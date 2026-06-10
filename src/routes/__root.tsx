@@ -263,7 +263,7 @@ function Footer() {
           <ul className="mt-4 space-y-2.5 text-sm text-cream/85">
             <li>Foshan, Guangdong</li>
             <li>China</li>
-            <li className="pt-2"><a href="mailto:hello@aksharfoshan.com" className="hover:text-gold">hello@aksharfoshan.com</a></li>
+            <li className="pt-2"><a href="mailto:info@aksharfoshan.com" className="hover:text-gold">info@aksharfoshan.com</a></li>
           </ul>
         </div>
       </div>
