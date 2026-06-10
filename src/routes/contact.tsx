@@ -1,11 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion } from "motion/react";
-import { z } from "zod";
-import { toast } from "sonner";
 import { PROJECTS } from "@/data/projects";
 import { FadeIn, Eyebrow, Reveal } from "@/components/motion-primitives";
-import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -22,71 +19,12 @@ export const Route = createFileRoute("/contact")({
 
 const SCOPES = ["Casegoods", "Upholstery", "Lighting & Mirrors", "Bath Accessories", "Outdoor", "Full FF&E"];
 
-const submissionSchema = z.object({
-  name: z.string().trim().min(1, "Name is required").max(120, "Name is too long"),
-  company: z.string().trim().max(200, "Company is too long").optional().or(z.literal("")),
-  email: z.string().trim().email("Enter a valid email").max(255),
-  location: z.string().trim().max(200, "Location is too long").optional().or(z.literal("")),
-  scope: z.array(z.string()).max(20),
-  brief: z.string().trim().min(10, "Tell us a little more (10+ characters)").max(5000, "Brief is too long"),
-});
-
-type FieldErrors = Partial<Record<keyof z.infer<typeof submissionSchema>, string>>;
-
 function Contact() {
   const [sent, setSent] = useState(false);
   const [scope, setScope] = useState<string[]>([]);
-  const [submitting, setSubmitting] = useState(false);
-  const [errors, setErrors] = useState<FieldErrors>({});
 
   const toggle = (s: string) =>
     setScope((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setErrors({});
-    const fd = new FormData(e.currentTarget);
-    const raw = {
-      name: String(fd.get("name") ?? ""),
-      company: String(fd.get("company") ?? ""),
-      email: String(fd.get("email") ?? ""),
-      location: String(fd.get("location") ?? ""),
-      scope,
-      brief: String(fd.get("brief") ?? ""),
-    };
-
-    const parsed = submissionSchema.safeParse(raw);
-    if (!parsed.success) {
-      const next: FieldErrors = {};
-      for (const issue of parsed.error.issues) {
-        const key = issue.path[0] as keyof FieldErrors;
-        if (key && !next[key]) next[key] = issue.message;
-      }
-      setErrors(next);
-      toast.error("Please correct the highlighted fields.");
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const { error } = await supabase.from("contact_submissions").insert({
-        name: parsed.data.name,
-        company: parsed.data.company || null,
-        email: parsed.data.email,
-        location: parsed.data.location || null,
-        scope: parsed.data.scope,
-        brief: parsed.data.brief,
-      });
-      if (error) throw error;
-      toast.success("Brief received — we'll be in touch within 5 working days.");
-      setSent(true);
-    } catch (err) {
-      console.error("contact submission failed", err);
-      toast.error("Something went wrong. Please email info@aksharfoshan.com directly.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   return (
     <>
@@ -123,19 +61,22 @@ function Contact() {
                     Thank you. A project manager will reach out within five working days with next steps.
                   </p>
                   <button
-                    onClick={() => { setSent(false); setScope([]); setErrors({}); }}
+                    onClick={() => { setSent(false); setScope([]); }}
                     className="mt-8 rounded-full border border-border px-5 py-2.5 text-sm hover:bg-primary/5"
                   >
                     Submit another brief
                   </button>
                 </motion.div>
               ) : (
-                <form onSubmit={handleSubmit} noValidate className="space-y-7">
+                <form
+                  onSubmit={(e) => { e.preventDefault(); setSent(true); }}
+                  className="space-y-7"
+                >
                   <div className="grid gap-7 md:grid-cols-2">
-                    <Field label="Full name" name="name" placeholder="Jane Doe" required error={errors.name} />
-                    <Field label="Company" name="company" placeholder="Studio / Brand / Owner group" error={errors.company} />
-                    <Field label="Email" name="email" type="email" placeholder="you@studio.com" required error={errors.email} />
-                    <Field label="Property location" name="location" placeholder="City, Country" error={errors.location} />
+                    <Field label="Full name" name="name" placeholder="Jane Doe" required />
+                    <Field label="Company" name="company" placeholder="Studio / Brand / Owner group" />
+                    <Field label="Email" name="email" type="email" placeholder="you@studio.com" required />
+                    <Field label="Property location" name="location" placeholder="City, Country" />
                   </div>
 
                   <div>
@@ -162,26 +103,21 @@ function Contact() {
                   </div>
 
                   <div>
-                    <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Brief <span className="text-primary">*</span></label>
+                    <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Brief</label>
                     <textarea
                       name="brief"
                       required
                       rows={5}
-                      maxLength={5000}
                       placeholder="Property type, key count, brand standards, timeline…"
-                      className={`mt-3 w-full resize-none rounded-2xl border bg-background px-5 py-4 text-sm focus:outline-none ${
-                        errors.brief ? "border-destructive focus:border-destructive" : "border-border focus:border-primary"
-                      }`}
+                      className="mt-3 w-full resize-none rounded-2xl border border-border bg-background px-5 py-4 text-sm focus:border-primary focus:outline-none"
                     />
-                    {errors.brief && <p className="mt-2 text-xs text-destructive">{errors.brief}</p>}
                   </div>
 
                   <button
                     type="submit"
-                    disabled={submitting}
-                    className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-4 text-sm font-medium text-primary-foreground transition-all hover:shadow-[0_20px_50px_-20px_rgba(58,26,74,0.6)] disabled:opacity-60"
+                    className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-4 text-sm font-medium text-primary-foreground transition-all hover:shadow-[0_20px_50px_-20px_rgba(58,26,74,0.6)]"
                   >
-                    {submitting ? "Sending…" : <>Send the brief <span>→</span></>}
+                    Send the brief <span>→</span>
                   </button>
                 </form>
               )}
@@ -199,7 +135,8 @@ function Contact() {
                 <Eyebrow>Studio</Eyebrow>
                 <div className="mt-4 space-y-3 text-sm">
                   <Row k="Address" v="Foshan, Guangdong, China" />
-                  <Row k="Email" v={<a href="mailto:info@aksharfoshan.com" className="hover:text-primary">info@aksharfoshan.com</a>} />
+                  <Row k="Email" v={<a href="mailto:hello@aksharfoshan.com" className="hover:text-primary">hello@aksharfoshan.com</a>} />
+                  <Row k="Phone" v="+86 757 0000 0000" />
                   <Row k="Hours" v="Mon–Sat · 09:00–18:00 CST" />
                 </div>
               </div>
@@ -219,8 +156,8 @@ function Contact() {
   );
 }
 
-function Field({ label, name, type = "text", placeholder, required, error }: {
-  label: string; name: string; type?: string; placeholder?: string; required?: boolean; error?: string;
+function Field({ label, name, type = "text", placeholder, required }: {
+  label: string; name: string; type?: string; placeholder?: string; required?: boolean;
 }) {
   return (
     <label className="block">
@@ -230,11 +167,8 @@ function Field({ label, name, type = "text", placeholder, required, error }: {
         type={type}
         placeholder={placeholder}
         required={required}
-        className={`mt-3 w-full rounded-full border bg-background px-5 py-3.5 text-sm focus:outline-none ${
-          error ? "border-destructive focus:border-destructive" : "border-border focus:border-primary"
-        }`}
+        className="mt-3 w-full rounded-full border border-border bg-background px-5 py-3.5 text-sm focus:border-primary focus:outline-none"
       />
-      {error && <p className="mt-2 text-xs text-destructive">{error}</p>}
     </label>
   );
 }
