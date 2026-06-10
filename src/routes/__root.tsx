@@ -302,7 +302,9 @@ function RootComponent() {
         <Navbar />
         <PageTransitions />
         <Footer />
+        <Toaster position="top-center" richColors />
       </div>
     </QueryClientProvider>
+
   );
 }
