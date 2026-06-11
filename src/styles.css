@@ -36,7 +36,7 @@
   --color-cream: var(--cream);
 
   --font-display: "Fraunces", "Cormorant Garamond", Georgia, serif;
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-sans: "Jost", "Avenir Next", "Avenir", system-ui, sans-serif;
 }
 
 :root {
