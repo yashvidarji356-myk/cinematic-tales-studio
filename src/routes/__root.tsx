@@ -281,13 +281,23 @@ function PageTransitions() {
     <AnimatePresence mode="wait">
       <motion.main
         key={pathname}
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -8 }}
-        transition={{ duration: 0.45, ease: [0.7, 0, 0.2, 1] }}
+        initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
+        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        exit={{ opacity: 0, y: -12, filter: "blur(6px)" }}
+        transition={{ duration: 0.6, ease: [0.7, 0, 0.2, 1] }}
       >
         <Outlet />
       </motion.main>
+      {/* Cinematic curtain wipe between routes */}
+      <motion.div
+        key={pathname + "-curtain"}
+        initial={{ scaleY: 1 }}
+        animate={{ scaleY: 0 }}
+        exit={{ scaleY: 0 }}
+        transition={{ duration: 0.8, ease: [0.7, 0, 0.2, 1] }}
+        style={{ transformOrigin: "top" }}
+        className="pointer-events-none fixed inset-0 z-[55] bg-[oklch(0.14_0.02_290)]"
+      />
     </AnimatePresence>
   );
 }
