@@ -48,15 +48,38 @@ function Hero() {
 
   return (
     <section ref={ref} className="relative min-h-[100svh] overflow-hidden pt-28 md:pt-32">
-      {/* Soft cream radial backdrop */}
+      {/* Soft cream radial backdrop with animated glow */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,oklch(0.95_0.04_310/0.45),transparent_60%),radial-gradient(circle_at_80%_80%,oklch(0.93_0.07_80/0.4),transparent_60%)]" />
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute -left-32 top-20 h-[420px] w-[420px] rounded-full"
+        style={{ background: "radial-gradient(circle, oklch(0.4 0.18 305 / 0.25), transparent 70%)", filter: "blur(40px)" }}
+        animate={{ x: [0, 60, 0], y: [0, 40, 0] }}
+        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute -right-32 bottom-10 h-[460px] w-[460px] rounded-full"
+        style={{ background: "radial-gradient(circle, oklch(0.74 0.12 80 / 0.3), transparent 70%)", filter: "blur(50px)" }}
+        animate={{ x: [0, -50, 0], y: [0, -60, 0] }}
+        transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+      />
+
       <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:pb-32">
         <div className="relative z-10">
           <Eyebrow>Hospitality FF&amp;E · Est. Foshan</Eyebrow>
-          <h1 className="mt-6 text-balance text-[clamp(2.6rem,7vw,5.6rem)] leading-[0.95]">
-            <Reveal>Furniture that</Reveal>{" "}
-            <Reveal className="italic text-primary">tells the</Reveal>{" "}
-            <Reveal>story of a hotel.</Reveal>
+          <h1 className="mt-6 text-balance font-display text-[clamp(2.6rem,7vw,5.6rem)] leading-[0.95]">
+            <span className="block overflow-hidden">
+              <SplitText text="Furniture that" />
+            </span>
+            <span className="block overflow-hidden italic">
+              <span className="text-shimmer">
+                <SplitText text="tells the story" delay={0.35} />
+              </span>
+            </span>
+            <span className="block overflow-hidden">
+              <SplitText text="of a hotel." delay={0.8} />
+            </span>
           </h1>
           <motion.p
             initial={{ opacity: 0, y: 16 }}
