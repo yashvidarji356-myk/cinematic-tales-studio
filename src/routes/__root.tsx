@@ -306,7 +306,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="relative min-h-screen bg-background text-foreground">
+      <div className="film-grain relative min-h-screen bg-background text-foreground">
         <Navbar />
         <PageTransitions />
         <Footer />
