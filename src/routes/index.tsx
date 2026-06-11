@@ -119,11 +119,16 @@ function Hero() {
             transition={{ delay: 1.2, duration: 0.8 }}
             className="mt-12 grid max-w-xl grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4"
           >
-            {STATS.map((s) => (
-              <div key={s.l}>
+            {STATS.map((s, i) => (
+              <motion.div
+                key={s.l}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.3 + i * 0.12, duration: 0.7, ease: [0.2, 0.7, 0.2, 1] }}
+              >
                 <dt className="font-display text-3xl text-foreground">{s.v}</dt>
                 <dd className="mt-1 text-xs uppercase tracking-[0.15em] text-muted-foreground">{s.l}</dd>
-              </div>
+              </motion.div>
             ))}
           </motion.dl>
         </div>
