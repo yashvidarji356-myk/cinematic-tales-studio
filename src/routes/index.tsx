@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import { PROJECTS } from "@/data/projects";
-import { FadeIn, Reveal, Eyebrow, Parallax } from "@/components/motion-primitives";
+import { FadeIn, Reveal, Eyebrow, Parallax, SplitText } from "@/components/motion-primitives";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -48,15 +48,38 @@ function Hero() {
 
   return (
     <section ref={ref} className="relative min-h-[100svh] overflow-hidden pt-28 md:pt-32">
-      {/* Soft cream radial backdrop */}
+      {/* Soft cream radial backdrop with animated glow */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,oklch(0.95_0.04_310/0.45),transparent_60%),radial-gradient(circle_at_80%_80%,oklch(0.93_0.07_80/0.4),transparent_60%)]" />
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute -left-32 top-20 h-[420px] w-[420px] rounded-full"
+        style={{ background: "radial-gradient(circle, oklch(0.4 0.18 305 / 0.25), transparent 70%)", filter: "blur(40px)" }}
+        animate={{ x: [0, 60, 0], y: [0, 40, 0] }}
+        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute -right-32 bottom-10 h-[460px] w-[460px] rounded-full"
+        style={{ background: "radial-gradient(circle, oklch(0.74 0.12 80 / 0.3), transparent 70%)", filter: "blur(50px)" }}
+        animate={{ x: [0, -50, 0], y: [0, -60, 0] }}
+        transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+      />
+
       <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:pb-32">
         <div className="relative z-10">
           <Eyebrow>Hospitality FF&amp;E · Est. Foshan</Eyebrow>
-          <h1 className="mt-6 text-balance text-[clamp(2.6rem,7vw,5.6rem)] leading-[0.95]">
-            <Reveal>Furniture that</Reveal>{" "}
-            <Reveal className="italic text-primary">tells the</Reveal>{" "}
-            <Reveal>story of a hotel.</Reveal>
+          <h1 className="mt-6 text-balance font-display text-[clamp(2.6rem,7vw,5.6rem)] leading-[0.95]">
+            <span className="block overflow-hidden">
+              <SplitText text="Furniture that" />
+            </span>
+            <span className="block overflow-hidden italic">
+              <span className="text-shimmer">
+                <SplitText text="tells the story" delay={0.35} />
+              </span>
+            </span>
+            <span className="block overflow-hidden">
+              <SplitText text="of a hotel." delay={0.8} />
+            </span>
           </h1>
           <motion.p
             initial={{ opacity: 0, y: 16 }}
@@ -96,27 +119,39 @@ function Hero() {
             transition={{ delay: 1.2, duration: 0.8 }}
             className="mt-12 grid max-w-xl grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4"
           >
-            {STATS.map((s) => (
-              <div key={s.l}>
+            {STATS.map((s, i) => (
+              <motion.div
+                key={s.l}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.3 + i * 0.12, duration: 0.7, ease: [0.2, 0.7, 0.2, 1] }}
+              >
                 <dt className="font-display text-3xl text-foreground">{s.v}</dt>
                 <dd className="mt-1 text-xs uppercase tracking-[0.15em] text-muted-foreground">{s.l}</dd>
-              </div>
+              </motion.div>
             ))}
           </motion.dl>
         </div>
 
         {/* Cinematic collage */}
         <motion.div style={{ y, scale, opacity }} className="relative grain mx-auto aspect-[4/5] w-full max-w-[560px]">
-          <div className="absolute inset-0 overflow-hidden rounded-[28px] shadow-[0_40px_80px_-30px_rgba(58,26,74,0.45)]">
+          <motion.div
+            initial={{ clipPath: "inset(100% 0 0 0)" }}
+            animate={{ clipPath: "inset(0% 0 0 0)" }}
+            transition={{ duration: 1.4, ease: [0.7, 0, 0.2, 1], delay: 0.2 }}
+            className="absolute inset-0 overflow-hidden rounded-[28px] shadow-[0_40px_80px_-30px_rgba(58,26,74,0.45)]"
+          >
             <img src={hero} alt="Featured hospitality property" className="kenburns h-full w-full object-cover" />
             <div className="vignette absolute inset-0" />
-          </div>
+            {/* shimmering edge highlight */}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 mix-blend-overlay transition-opacity duration-700 hover:opacity-100" />
+          </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 24, rotate: -6 }}
             animate={{ opacity: 1, y: 0, rotate: -4 }}
-            transition={{ delay: 0.6, duration: 0.9 }}
-            className="absolute -left-6 top-8 w-44 overflow-hidden rounded-2xl border-4 border-cream shadow-2xl md:w-56"
+            transition={{ delay: 0.9, duration: 0.9 }}
+            className="absolute -left-6 top-8 w-44 overflow-hidden rounded-2xl border-4 border-cream shadow-2xl float-y md:w-56"
           >
             <img src={inset} alt="Guest room detail" className="h-full w-full object-cover" />
           </motion.div>
@@ -124,8 +159,8 @@ function Hero() {
           <motion.div
             initial={{ opacity: 0, y: 24, rotate: 5 }}
             animate={{ opacity: 1, y: 0, rotate: 3 }}
-            transition={{ delay: 0.8, duration: 0.9 }}
-            className="absolute -bottom-8 -right-4 w-48 overflow-hidden rounded-2xl border-4 border-cream shadow-2xl md:w-60"
+            transition={{ delay: 1.1, duration: 0.9 }}
+            className="absolute -bottom-8 -right-4 w-48 overflow-hidden rounded-2xl border-4 border-cream shadow-2xl float-y-slow md:w-60"
           >
             <img src={inset2} alt="Lounge vignette" className="h-full w-full object-cover" />
           </motion.div>
@@ -133,10 +168,31 @@ function Hero() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1, duration: 0.7 }}
-            className="absolute right-6 top-6 rounded-full bg-background/90 px-4 py-2 text-[10px] font-medium uppercase tracking-[0.18em] backdrop-blur"
+            transition={{ delay: 1.3, duration: 0.7 }}
+            className="absolute right-6 top-6 flex items-center gap-2 rounded-full bg-background/90 px-4 py-2 text-[10px] font-medium uppercase tracking-[0.18em] backdrop-blur"
           >
-            <span className="text-primary">●</span> Now manufacturing — 240 keys
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+            </span>
+            Now manufacturing — 240 keys
+          </motion.div>
+
+          {/* Rotating ring badge */}
+          <motion.div
+            aria-hidden
+            animate={{ rotate: 360 }}
+            transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+            className="absolute -bottom-10 -left-10 hidden h-28 w-28 md:block"
+          >
+            <svg viewBox="0 0 100 100" className="h-full w-full text-primary">
+              <defs>
+                <path id="circle" d="M50,50 m-38,0 a38,38 0 1,1 76,0 a38,38 0 1,1 -76,0" />
+              </defs>
+              <text fontSize="9" fill="currentColor" letterSpacing="3">
+                <textPath href="#circle">CRAFT · STORY · DELIVER · CRAFT · STORY · DELIVER · </textPath>
+              </text>
+            </svg>
           </motion.div>
         </motion.div>
       </div>
