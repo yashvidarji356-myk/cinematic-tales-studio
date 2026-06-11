@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import { PROJECTS } from "@/data/projects";
-import { FadeIn, Reveal, Eyebrow, Parallax } from "@/components/motion-primitives";
+import { FadeIn, Reveal, Eyebrow, Parallax, SplitText } from "@/components/motion-primitives";
 
 export const Route = createFileRoute("/")({
   head: () => ({
