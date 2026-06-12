@@ -124,3 +124,106 @@ export const CATEGORIES: ("All" | Category)[] = [
   "Brand Projects",
   "Workshop",
 ];
+
+export type Collection = {
+  category: Category;
+  tagline: string;
+  description: string;
+  stats: { label: string; value: string }[];
+  palette: string;
+  signature: string;
+};
+
+export const COLLECTIONS: Collection[] = [
+  {
+    category: "Guest Rooms",
+    tagline: "The first impression, multiplied by a thousand keys.",
+    description:
+      "Residential warmth engineered for hospitality wear. Full-package guest room FF&E — headboards, casegoods, lighting and soft seating — delivered to brand standard and ready to install.",
+    stats: [
+      { label: "Keys delivered", value: "2,400+" },
+      { label: "Active brands", value: "9" },
+      { label: "Lead time", value: "10–14 wk" },
+    ],
+    palette: "Warm oak · brushed brass · ivory bouclé",
+    signature: "Country Inn King Room",
+  },
+  {
+    category: "Suites",
+    tagline: "Two rooms, one continuous mood.",
+    description:
+      "Junior, family and extended-stay suite programs that hold their geometry over years of turnover. Sleeper sectionals, dual-desk workstations, kitchenettes and bespoke media walls.",
+    stats: [
+      { label: "Suite typologies", value: "12" },
+      { label: "Convertible seating", value: "All units" },
+      { label: "Brands served", value: "Marriott · IHG · Hilton" },
+    ],
+    palette: "Walnut veneer · ribbed velvet · smoked glass",
+    signature: "King Suite with Lounge",
+  },
+  {
+    category: "Lobby & Lounge",
+    tagline: "The room that sets the tariff.",
+    description:
+      "Sculpted public-space seating, stone-top cocktail tables and banquettes built for the camera and the calendar. Bespoke per property — never catalog-stock.",
+    stats: [
+      { label: "Bespoke ratio", value: "100%" },
+      { label: "Material library", value: "180+ SKUs" },
+      { label: "Avg. turn", value: "8 weeks" },
+    ],
+    palette: "Travertine · bronzed steel · saddle leather",
+    signature: "Boutique Lobby Lounge",
+  },
+  {
+    category: "Casegoods",
+    tagline: "Cabinetry with a millimetre of tolerance.",
+    description:
+      "Dressers, media consoles, writing desks and wardrobes built on a CNC line with hand-finished veneer. Cable management and USB-C charging integrated as standard.",
+    stats: [
+      { label: "Edge tolerance", value: "±0.3 mm" },
+      { label: "Finish layers", value: "7-coat" },
+      { label: "Veneers stocked", value: "24" },
+    ],
+    palette: "Walnut · rift oak · matte lacquer",
+    signature: "Executive Casegoods Set",
+  },
+  {
+    category: "Brand Projects",
+    tagline: "Refresh programs at the speed of operations.",
+    description:
+      "Multi-property refresh and rollout for major flags — keys, corridors, public space and back-of-house — coordinated with brand standards and the operating calendar.",
+    stats: [
+      { label: "Properties refreshed", value: "60+" },
+      { label: "Fastest turn", value: "21 days / 56 keys" },
+      { label: "Flags", value: "Marriott · Hilton · IHG" },
+    ],
+    palette: "Brand-standard · custom-matched",
+    signature: "Marriott Refresh Wing",
+  },
+  {
+    category: "Workshop",
+    tagline: "Inside the Foshan floor.",
+    description:
+      "Frames from our own production floor — kiln-dried stock, CNC cutting, climate-controlled spray, final QC. Every project ships from one campus, one team.",
+    stats: [
+      { label: "Floor area", value: "32,000 m²" },
+      { label: "QC stations", value: "6" },
+      { label: "Daily output", value: "120 cartons" },
+    ],
+    palette: "Raw timber · steel · sodium light",
+    signature: "Workshop — Assembly Bay",
+  },
+];
+
+export function collectionFor(cat: Category) {
+  return COLLECTIONS.find((c) => c.category === cat)!;
+}
+
+export function projectsIn(cat: Category) {
+  return PROJECTS.filter((p) => p.category === cat);
+}
+
+export function featuredIn(cat: Category, n = 4) {
+  return projectsIn(cat).slice(0, n);
+}
+
