@@ -1,16 +1,24 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { PROJECTS, CATEGORIES, type Category } from "@/data/projects";
+import {
+  PROJECTS,
+  CATEGORIES,
+  COLLECTIONS,
+  collectionFor,
+  featuredIn,
+  projectsIn,
+  type Category,
+} from "@/data/projects";
 import { FadeIn, Eyebrow } from "@/components/motion-primitives";
 
 export const Route = createFileRoute("/portfolio")({
   head: () => ({
     meta: [
-      { title: "Portfolio — Akshar Foshan Hospitality FF&E" },
-      { name: "description", content: "Forty cinematic frames from the 2026 Akshar Foshan catalog — guest rooms, suites, lounges, casegoods and the Foshan workshop." },
-      { property: "og:title", content: "Portfolio — Akshar Foshan" },
-      { property: "og:description", content: "Forty frames of hospitality FF&E from the Akshar Foshan 2026 catalog." },
+      { title: "Portfolio — Akshar Foshan Hospitality FF&E Collections" },
+      { name: "description", content: "Browse the Akshar Foshan collections — Guest Rooms, Suites, Lobby, Casegoods, Brand Programs and the Foshan workshop. Stats, palettes and featured frames per category." },
+      { property: "og:title", content: "Collections — Akshar Foshan" },
+      { property: "og:description", content: "Seven hospitality FF&E collections with stats, palettes and featured frames from the 2026 catalog." },
       { property: "og:image", content: PROJECTS[0].url },
     ],
   }),
@@ -20,30 +28,176 @@ export const Route = createFileRoute("/portfolio")({
 function Portfolio() {
   const [filter, setFilter] = useState<"All" | Category>("All");
   const [lightbox, setLightbox] = useState<number | null>(null);
+  const galleryRef = useRef<HTMLDivElement>(null);
 
   const items = useMemo(
     () => (filter === "All" ? PROJECTS : PROJECTS.filter((p) => p.category === filter)),
     [filter],
   );
 
+  const activeCollection = filter !== "All" ? collectionFor(filter) : null;
+
+  function selectCategory(c: "All" | Category) {
+    setFilter(c);
+    requestAnimationFrame(() => {
+      galleryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (lightbox === null) return;
+      if (e.key === "Escape") setLightbox(null);
+      if (e.key === "ArrowRight") setLightbox((lightbox + 1) % PROJECTS.length);
+      if (e.key === "ArrowLeft") setLightbox(((lightbox - 1) + PROJECTS.length) % PROJECTS.length);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightbox]);
+
   return (
     <>
+      {/* Hero */}
       <section className="relative overflow-hidden pt-36 md:pt-44">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,oklch(0.92_0.05_310/0.5),transparent_55%)]" />
-        <div className="relative mx-auto max-w-7xl px-6 pb-12">
+        <div className="relative mx-auto max-w-7xl px-6 pb-16">
           <FadeIn>
-            <Eyebrow>The 2026 Catalog · 40 frames</Eyebrow>
+            <Eyebrow>The 2026 Catalog · 7 collections · 40 frames</Eyebrow>
             <h1 className="mt-6 max-w-4xl text-balance text-[clamp(2.6rem,6.5vw,5.2rem)] leading-[0.98]">
-              Every frame is a property. <span className="italic text-primary">Every piece, a decision.</span>
+              Collections, not categories.{" "}
+              <span className="italic text-primary">Each one a working brief.</span>
             </h1>
             <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-              Browse guest rooms, suites, lobbies and workshop frames pulled directly from the latest
-              Akshar Foshan catalog. Filter by scope to focus the story.
+              Seven hospitality FF&E collections — built on our Foshan floor, shipped to brand
+              standard. Open a collection to read the brief, the stats and a featured frame.
             </p>
           </FadeIn>
+        </div>
+      </section>
 
-          <FadeIn delay={0.15}>
-            <div className="mt-12 flex flex-wrap items-center gap-2">
+      {/* Collections grid */}
+      <section className="relative pb-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {COLLECTIONS.map((col, i) => {
+              const items = projectsIn(col.category);
+              const hero = items[0];
+              const stack = featuredIn(col.category, 4).slice(1);
+              return (
+                <motion.button
+                  key={col.category}
+                  initial={{ opacity: 0, y: 32 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.7, delay: (i % 3) * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                  onClick={() => selectCategory(col.category)}
+                  className="group relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card text-left transition-all duration-500 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_30px_60px_-30px_oklch(0.3_0.08_310/0.45)]"
+                >
+                  {/* Hero image */}
+                  <div className="relative aspect-[5/4] overflow-hidden bg-muted">
+                    <img
+                      src={hero.url}
+                      alt={col.category}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-[1800ms] ease-out group-hover:scale-[1.08]"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
+                    <div className="absolute left-5 top-5 rounded-full bg-cream/15 px-3 py-1 text-[10px] uppercase tracking-[0.22em] text-cream backdrop-blur">
+                      Collection · 0{i + 1}
+                    </div>
+                    <div className="absolute inset-x-0 bottom-0 p-6 text-cream">
+                      <div className="font-display text-3xl leading-tight md:text-4xl">
+                        {col.category}
+                      </div>
+                      <div className="mt-1 text-sm text-cream/75">{items.length} frames</div>
+                    </div>
+                  </div>
+
+                  {/* Body */}
+                  <div className="flex flex-1 flex-col gap-5 p-6">
+                    <p className="font-display text-lg italic text-primary/90">{col.tagline}</p>
+                    <p className="text-sm leading-relaxed text-muted-foreground">
+                      {col.description}
+                    </p>
+
+                    {/* Stats */}
+                    <div className="grid grid-cols-3 gap-3 border-y border-border py-4">
+                      {col.stats.map((s) => (
+                        <div key={s.label}>
+                          <div className="font-display text-lg leading-tight text-foreground">
+                            {s.value}
+                          </div>
+                          <div className="mt-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                            {s.label}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Featured strip */}
+                    <div>
+                      <div className="mb-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                        Featured picks
+                      </div>
+                      <div className="flex gap-2">
+                        {stack.map((p) => (
+                          <div
+                            key={p.id}
+                            className="relative aspect-square w-full overflow-hidden rounded-lg bg-muted"
+                          >
+                            <img
+                              src={p.url}
+                              alt={p.title}
+                              loading="lazy"
+                              className="h-full w-full object-cover transition-transform duration-[1400ms] ease-out group-hover:scale-[1.1]"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-auto flex items-center justify-between pt-2">
+                      <div className="text-xs text-muted-foreground">{col.palette}</div>
+                      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">
+                        Open collection
+                        <span className="transition-transform duration-300 group-hover:translate-x-1">
+                          →
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Filter + gallery */}
+      <section ref={galleryRef} className="relative scroll-mt-28 pb-32">
+        <div className="mx-auto max-w-7xl px-6">
+          <FadeIn>
+            <div className="flex flex-col items-start justify-between gap-6 border-t border-border pt-12 md:flex-row md:items-end">
+              <div>
+                <Eyebrow>Browse all frames</Eyebrow>
+                <h2 className="mt-4 text-balance text-[clamp(1.8rem,3.5vw,2.8rem)] leading-tight">
+                  {activeCollection ? activeCollection.category : "The full 40-frame index"}
+                </h2>
+                {activeCollection && (
+                  <p className="mt-3 max-w-xl text-muted-foreground">
+                    {activeCollection.tagline}
+                  </p>
+                )}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Showing <span className="font-medium text-foreground">{items.length}</span> /{" "}
+                {PROJECTS.length}
+              </div>
+            </div>
+          </FadeIn>
+
+          <FadeIn delay={0.1}>
+            <div className="mt-8 flex flex-wrap items-center gap-2">
               {CATEGORIES.map((c) => {
                 const active = filter === c;
                 return (
@@ -58,21 +212,19 @@ function Portfolio() {
                   >
                     {c}
                     <span className="ml-2 text-xs opacity-60">
-                      {c === "All" ? PROJECTS.length : PROJECTS.filter((p) => p.category === c).length}
+                      {c === "All"
+                        ? PROJECTS.length
+                        : PROJECTS.filter((p) => p.category === c).length}
                     </span>
                   </button>
                 );
               })}
             </div>
           </FadeIn>
-        </div>
-      </section>
 
-      <section className="relative pb-32">
-        <div className="mx-auto max-w-7xl px-6">
           <motion.div
             layout
-            className="columns-1 gap-5 sm:columns-2 lg:columns-3 [&>*]:mb-5"
+            className="mt-12 columns-1 gap-5 sm:columns-2 lg:columns-3 [&>*]:mb-5"
           >
             <AnimatePresence>
               {items.map((p, i) => (
@@ -95,7 +247,9 @@ function Portfolio() {
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/0 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                   <div className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-3 p-5 text-cream opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
                     <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-gold">
-                      <span>{p.category}</span><span>·</span><span>{p.year}</span>
+                      <span>{p.category}</span>
+                      <span>·</span>
+                      <span>{p.year}</span>
                     </div>
                     <div className="mt-1 font-display text-xl leading-tight">{p.title}</div>
                     <div className="mt-1 text-xs text-cream/70">{p.location}</div>
@@ -135,20 +289,32 @@ function Portfolio() {
             className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/95 p-4 backdrop-blur"
           >
             <button
-              onClick={(e) => { e.stopPropagation(); setLightbox(((lightbox - 1) + PROJECTS.length) % PROJECTS.length); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightbox(((lightbox - 1) + PROJECTS.length) % PROJECTS.length);
+              }}
               className="absolute left-4 top-1/2 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full bg-cream/10 text-cream hover:bg-cream/20 md:left-8"
               aria-label="Previous"
-            >←</button>
+            >
+              ←
+            </button>
             <button
-              onClick={(e) => { e.stopPropagation(); setLightbox((lightbox + 1) % PROJECTS.length); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightbox((lightbox + 1) % PROJECTS.length);
+              }}
               className="absolute right-4 top-1/2 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full bg-cream/10 text-cream hover:bg-cream/20 md:right-8"
               aria-label="Next"
-            >→</button>
+            >
+              →
+            </button>
             <button
               onClick={() => setLightbox(null)}
               className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-cream/10 text-cream hover:bg-cream/20"
               aria-label="Close"
-            >✕</button>
+            >
+              ✕
+            </button>
             <motion.div
               key={lightbox}
               initial={{ opacity: 0, scale: 0.96 }}
@@ -158,13 +324,19 @@ function Portfolio() {
               className="grid w-full max-w-6xl gap-6 md:grid-cols-[1.6fr_1fr]"
             >
               <div className="overflow-hidden rounded-2xl">
-                <img src={PROJECTS[lightbox].url} alt={PROJECTS[lightbox].title} className="h-full max-h-[80vh] w-full object-cover" />
+                <img
+                  src={PROJECTS[lightbox].url}
+                  alt={PROJECTS[lightbox].title}
+                  className="h-full max-h-[80vh] w-full object-cover"
+                />
               </div>
               <div className="self-center text-cream">
                 <div className="text-[10px] uppercase tracking-[0.25em] text-gold">
                   {PROJECTS[lightbox].category} · {PROJECTS[lightbox].year}
                 </div>
-                <h3 className="mt-3 font-display text-3xl md:text-4xl">{PROJECTS[lightbox].title}</h3>
+                <h3 className="mt-3 font-display text-3xl md:text-4xl">
+                  {PROJECTS[lightbox].title}
+                </h3>
                 {PROJECTS[lightbox].brand && (
                   <div className="mt-2 text-sm text-cream/70">For {PROJECTS[lightbox].brand}</div>
                 )}
